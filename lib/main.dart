@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      showSemanticsDebugger: false,
+      debugShowCheckedModeBanner: false,
       home: MyHomePage(),
     );
   }
@@ -29,6 +29,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final String _apiId = "7ffacafe5af9daf806375e9ac959dc64";
   var _pays = '';
   var _temp;
+  String _description = 'No data yet';
+  var _weatherIcon;
   final countries = {
     'MA': 'Morocco',
     'QA': 'Qatar',
@@ -54,6 +56,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 _weatherValue = json.decode(response.body);
                 _pays = _weatherValue['sys']['country'];
                 _temp = _weatherValue['main']['temp'];
+                _description = _weatherValue['weather'][0]['description'];
+                _weatherIcon = _weatherValue['weather'][0]['icon'];
               })
             })
         .catchError((onError) {
@@ -84,12 +88,30 @@ class _MyHomePageState extends State<MyHomePage> {
                     border: OutlineInputBorder()),
               ),
               SizedBox(height: 40),
+              Center(
+                child: Text(
+                  _description,
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              SizedBox(height: 30),
               Row(
                 children: [
-                  Text(
-                    'Pays: ',
-                    style: TextStyle(fontSize: 25, color: Colors.green),
-                  ),
+                  _pays == ''
+                      ? Image(
+                          image: AssetImage('assets/countries/undefined.png'),
+                          width: 50,
+                        )
+                      : Image(
+                          image: NetworkImage(
+                              'https://flagcdn.com/w320/$_pays.png'
+                                  .toLowerCase()),
+                          width: 60,
+                        ),
                   SizedBox(width: 15),
                   Text(
                     countries.containsKey(_pays)
@@ -102,10 +124,16 @@ class _MyHomePageState extends State<MyHomePage> {
               SizedBox(height: 15),
               Row(
                 children: [
-                  Text(
-                    'Temp: ',
-                    style: TextStyle(fontSize: 25, color: Colors.red),
-                  ),
+                  _pays == ''
+                      ? Image(
+                          image: AssetImage('assets/countries/undefined.png'),
+                          width: 50,
+                        )
+                      : Image(
+                          image: NetworkImage(
+                              'http://openweathermap.org/img/wn/$_weatherIcon@2x.png'),
+                          width: 60,
+                        ),
                   SizedBox(width: 15),
                   Text(
                     '$_temp °C',
