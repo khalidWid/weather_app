@@ -31,6 +31,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var _pays = '';
   var _temp;
   String _description = 'No data yet';
+  String? _errorText = null;
   var _weatherIcon;
   final Map<String, String> countries = {
     'MA': 'Morocco',
@@ -61,10 +62,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 _temp = _weatherValue['main']['temp'];
                 _description = _weatherValue['weather'][0]['description'];
                 _weatherIcon = _weatherValue['weather'][0]['icon'];
+                _errorText = null;
               })
             })
-        .catchError((onError) {
-      print(onError);
+        .catchError((response) {
+      setState(() {
+        _errorText = 'City not found';
+      });
+      ;
     });
   }
 
@@ -86,95 +91,118 @@ class _MyHomePageState extends State<MyHomePage> {
                 style: TextStyle(fontSize: 20),
                 controller: _controller,
                 decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.all(20), isDense: false,
+                  contentPadding: const EdgeInsets.all(20),
+                  helperStyle: TextStyle(fontSize: 15),
+                  isDense: false,
                   suffixIcon: IconButton(
                       onPressed: () {
                         _getWeatherData(_controller.text);
                       },
                       icon: Icon(Icons.search)),
                   hintText: 'Search for a city...',
+                  errorText: _errorText,
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),),
-                ),
-              ),
-              SizedBox(height: 40),
-              Center(
-                child: Text(
-                  _description,
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.w300,
+                    borderRadius: BorderRadius.circular(30),
                   ),
-                  textAlign: TextAlign.center,
                 ),
               ),
               SizedBox(height: 20),
-              Row(
-                children: [
-                  _pays == ''
-                      ? Image(
-                          image: AssetImage('assets/countries/undefined.png'),
-                          width: 50,
-                        )
-                      : Image(
-                          image: NetworkImage(
-                              'https://flagcdn.com/w320/$_pays.png'
-                                  .toLowerCase()),
-                          width: 60,
-                        ),
-                  SizedBox(width: 15),
-                  Text(
-                    countries.containsKey(_pays)
-                        ? countries[_pays].toString()
-                        : _pays,
-                    style: TextStyle(fontSize: 25),
-                  )
-                ],
-              ),
-              SizedBox(height: 15),
-              Row(
-                children: [
-                  _pays == ''
-                      ? Image(
-                          image: AssetImage('assets/countries/undefined.png'),
-                          width: 50,
-                        )
-                      : Image(
-                          image: NetworkImage(
-                              'http://openweathermap.org/img/wn/$_weatherIcon@2x.png'),
-                          width: 60,
-                        ),
-                  SizedBox(width: 15),
-                  Text(
-                    '$_temp °C',
-                    style: TextStyle(fontSize: 25),
-                  ),
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.bottomRight,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          textStyle: const TextStyle(fontSize: 20),
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => TemperaturePage(
-                              city: '${_controller.text}, $_pays',
-                              temp: _weatherValue['main']['temp'],
-                              feels_like: _weatherValue['main']['feels_like'],
-                              temp_min: _weatherValue['main']['temp_min'],
-                              temp_max: _weatherValue['main']['temp_max'],
-                              pressure: _weatherValue['main']['pressure'],
-                              humidity: _weatherValue['main']['humidity'],
-                            ),
-                          ));
-                        },
-                        child: const Text('See more'),
-                      ),
+              Container(
+                  padding: EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[100],
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(20.0),
                     ),
-                  )
-                ],
-              ),
+                  ),
+                  child: Column(
+                    children: [
+                      Center(
+                        child: Text(
+                          '$_description',
+                          style: TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.w300,
+                              decoration: TextDecoration.underline),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Row(
+                        children: [
+                          _pays == ''
+                              ? Image(
+                                  image: AssetImage(
+                                      'assets/countries/undefined.png'),
+                                  width: 50,
+                                )
+                              : Image(
+                                  image: NetworkImage(
+                                      'https://flagcdn.com/w320/$_pays.png'
+                                          .toLowerCase()),
+                                  width: 60,
+                                ),
+                          SizedBox(width: 15),
+                          Text(
+                            countries.containsKey(_pays)
+                                ? countries[_pays].toString()
+                                : _pays,
+                            style: TextStyle(fontSize: 25),
+                          )
+                        ],
+                      ),
+                      SizedBox(height: 15),
+                      Row(
+                        children: [
+                          _pays == ''
+                              ? Image(
+                                  image: AssetImage(
+                                      'assets/countries/undefined.png'),
+                                  width: 50,
+                                )
+                              : Image(
+                                  image: NetworkImage(
+                                      'http://openweathermap.org/img/wn/$_weatherIcon@2x.png'),
+                                  width: 60,
+                                ),
+                          SizedBox(width: 15),
+                          Text(
+                            '$_temp °C',
+                            style: TextStyle(fontSize: 25),
+                          ),
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.bottomRight,
+                              child: TextButton(
+                                style: TextButton.styleFrom(
+                                  textStyle: const TextStyle(fontSize: 20),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => TemperaturePage(
+                                      city: '${_controller.text}, $_pays',
+                                      temp: _weatherValue['main']['temp'],
+                                      feels_like: _weatherValue['main']
+                                          ['feels_like'],
+                                      temp_min: _weatherValue['main']
+                                          ['temp_min'],
+                                      temp_max: _weatherValue['main']
+                                          ['temp_max'],
+                                      pressure: _weatherValue['main']
+                                          ['pressure'],
+                                      humidity: _weatherValue['main']
+                                          ['humidity'],
+                                    ),
+                                  ));
+                                },
+                                child: const Text('See more'),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ],
+                  )),
             ],
           ),
         ),
