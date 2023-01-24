@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weather_project/pages/temp_page.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -31,7 +32,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var _temp;
   String _description = 'No data yet';
   var _weatherIcon;
-  final countries = {
+  final Map<String, String> countries = {
     'MA': 'Morocco',
     'QA': 'Qatar',
     'FR': 'France',
@@ -39,6 +40,8 @@ class _MyHomePageState extends State<MyHomePage> {
     'GB': 'United Kingdom',
     'US': 'United States',
     'SA': 'Saudi Arabia',
+    'AE': 'United Arab Emirates',
+    'JP': 'Japan'
   };
 
   dynamic _weatherValue;
@@ -69,23 +72,30 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("METEO"),
+        title: Text("Weather Finder App"),
       ),
       body: Center(
         child: Container(
           padding: EdgeInsets.all(35),
           child: Column(
             children: [
+              SizedBox(
+                height: 70,
+              ),
               TextField(
+                style: TextStyle(fontSize: 20),
                 controller: _controller,
                 decoration: InputDecoration(
-                    suffixIcon: IconButton(
-                        onPressed: () {
-                          _getWeatherData(_controller.text);
-                        },
-                        icon: Icon(Icons.search)),
-                    hintText: 'Search for a city...',
-                    border: OutlineInputBorder()),
+                  contentPadding: const EdgeInsets.all(20), isDense: false,
+                  suffixIcon: IconButton(
+                      onPressed: () {
+                        _getWeatherData(_controller.text);
+                      },
+                      icon: Icon(Icons.search)),
+                  hintText: 'Search for a city...',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),),
+                ),
               ),
               SizedBox(height: 40),
               Center(
@@ -93,12 +103,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   _description,
                   style: TextStyle(
                     fontSize: 25,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w300,
                   ),
                   textAlign: TextAlign.center,
                 ),
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 20),
               Row(
                 children: [
                   _pays == ''
@@ -138,6 +148,30 @@ class _MyHomePageState extends State<MyHomePage> {
                   Text(
                     '$_temp °C',
                     style: TextStyle(fontSize: 25),
+                  ),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.bottomRight,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          textStyle: const TextStyle(fontSize: 20),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => TemperaturePage(
+                              city: '${_controller.text}, $_pays',
+                              temp: _weatherValue['main']['temp'],
+                              feels_like: _weatherValue['main']['feels_like'],
+                              temp_min: _weatherValue['main']['temp_min'],
+                              temp_max: _weatherValue['main']['temp_max'],
+                              pressure: _weatherValue['main']['pressure'],
+                              humidity: _weatherValue['main']['humidity'],
+                            ),
+                          ));
+                        },
+                        child: const Text('See more'),
+                      ),
+                    ),
                   )
                 ],
               ),
